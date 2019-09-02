@@ -71,7 +71,42 @@ func SetConnectionLostHandler(handler ConnectionLostHandler) Option {
 	}
 }
 
-func New(options ...Option) (NatsManagerInterface, error) {
+func NewNatsManager(options ...Option) (NatsManagerInterface, error) {
+	opts := getConnectionOpts(options...)
+
+	nasOpts := []nats.Option{
+		nats.Name(opts.ClientName),
+	}
+
+	if opts.User != "" && opts.Password != "" {
+		nasOpts = append(nasOpts, nats.UserInfo(opts.User, opts.Password))
+	}
+
+	nc, err := nats.Connect(opts.ServerUrls, nasOpts...)
+	if err != nil {
+		return nil, err
+	}
+
+	mb := &NatsManager{options: opts}
+	mb.client, err = stan.Connect(
+		opts.ClusterId,
+		opts.ClientId,
+		stan.NatsConn(nc),
+		stan.SetConnectionLostHandler(stan.ConnectionLostHandler(opts.ConnectionLostHandler)),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return mb, nil
+}
+
+func (opts *Options) HasEmptySettings() bool {
+	return opts.ServerUrls == "" || opts.ClientId == "" || opts.ClusterId == ""
+}
+
+func getConnectionOpts(options ...Option) *Options {
 	opts := Options{}
 	conn := &Options{}
 
@@ -80,11 +115,7 @@ func New(options ...Option) (NatsManagerInterface, error) {
 	}
 
 	if opts.HasEmptySettings() {
-		err := envconfig.Process("", conn)
-
-		if err != nil {
-			return nil, err
-		}
+		_ = envconfig.Process("", conn)
 	}
 
 	if opts.ServerUrls != "" {
@@ -115,34 +146,5 @@ func New(options ...Option) (NatsManagerInterface, error) {
 		conn.ConnectionLostHandler = opts.ConnectionLostHandler
 	}
 
-	nasOpts := []nats.Option{
-		nats.Name(conn.ClientName),
-	}
-
-	mb := &NatsManager{options: conn}
-
-	if conn.User != "" && conn.Password != "" {
-		nasOpts = append(nasOpts, nats.UserInfo(conn.User, conn.Password))
-	}
-
-	nc, err := nats.Connect(conn.ServerUrls, nasOpts...)
-	if err != nil {
-		return nil, err
-	}
-
-	mb.client, err = stan.Connect(
-		conn.ClusterId,
-		conn.ClientId,
-		stan.NatsConn(nc),
-		stan.SetConnectionLostHandler(stan.ConnectionLostHandler(conn.ConnectionLostHandler)),
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	return mb, nil
-}
-
-func (opts *Options) HasEmptySettings() bool {
-	return opts.ServerUrls == "" || opts.ClientId == "" || opts.ClusterId == ""
+	return conn
 }

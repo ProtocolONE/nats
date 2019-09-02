@@ -66,8 +66,8 @@ func (m NatsManager) Publish(subject string, msg interface{}, async bool) error 
 	return nil
 }
 
-func (m NatsManager) QueueSubscribe(subject string, qgroup string, cb MsgHandler, opts ...stan.SubscriptionOption) (Subscription, error) {
-	return m.client.QueueSubscribe(subject, qgroup, stan.MsgHandler(cb), opts...)
+func (m NatsManager) QueueSubscribe(subject string, qgroup string, handler MsgHandler, opts ...stan.SubscriptionOption) (Subscription, error) {
+	return m.client.QueueSubscribe(subject, qgroup, stan.MsgHandler(handler), opts...)
 }
 
 func (m NatsManager) Close() error {
