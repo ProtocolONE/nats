@@ -14,7 +14,7 @@ type Options struct {
 	ServerUrls            string `envconfig:"NATS_SERVER_URLS" default:"127.0.0.1:4222"`
 	ClusterId             string `envconfig:"NATS_CLUSTER_ID" default:"test-cluster"`
 	ClientId              string `envconfig:"NATS_CLIENT_ID" default:"billing-server-publisher"`
-	ClientName            string `envconfig:"NATS_CLIENT_Name" default:"NATS publisher"`
+	ClientName            string `envconfig:"NATS_CLIENT_NAME" default:"NATS publisher"`
 	Async                 bool   `envconfig:"NATS_ASYNC" default:"false"`
 	User                  string `envconfig:"NATS_USER" default:""`
 	Password              string `envconfig:"NATS_PASSWORD" default:""`

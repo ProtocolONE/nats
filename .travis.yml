@@ -1,0 +1,25 @@
+language: go
+sudo: false
+go:
+  - 1.12.x
+stages:
+  - test
+  - name: deploy
+    if: branch = master
+jobs:
+  include:
+    - stage: test
+      env:
+        - GO111MODULE=on
+        - NATS_SERVER_URLS=NATS_SERVER_URLS
+        - NATS_CLUSTER_ID=NATS_CLUSTER_ID
+        - NATS_CLIENT_ID=NATS_CLIENT_ID
+        - NATS_CLIENT_NAME=NATS_CLIENT_NAME
+        - NATS_ASYNC=NATS_ASYNC
+        - NATS_USER=NATS_USER
+        - NATS_PASSWORD=NATS_PASSWORD
+      install: true
+      script:
+        - go test ./... -coverprofile=coverage.out -covermode=atomic -p=1
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
