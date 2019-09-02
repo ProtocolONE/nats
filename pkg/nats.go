@@ -7,7 +7,6 @@ import (
 )
 
 type MsgHandler stan.MsgHandler
-type SubscriptionOption stan.SubscriptionOption
 type Subscription stan.Subscription
 type ConnectionLostHandler stan.ConnectionLostHandler
 

@@ -10,7 +10,7 @@ import (
 
 type NatsManagerInterface interface {
 	Publish(string, interface{}, bool) error
-	QueueSubscribe(string, string, MsgHandler, ...SubscriptionOption) (Subscription, error)
+	QueueSubscribe(string, string, MsgHandler, ...stan.SubscriptionOption) (Subscription, error)
 	Close() error
 }
 
@@ -66,14 +66,8 @@ func (m NatsManager) Publish(subject string, msg interface{}, async bool) error 
 	return nil
 }
 
-func (m NatsManager) QueueSubscribe(subject string, qgroup string, cb MsgHandler, opts ...SubscriptionOption) (Subscription, error) {
-	var options []stan.SubscriptionOption
-
-	for _, o := range opts {
-		options = append(options, stan.SubscriptionOption(o))
-	}
-
-	return m.client.QueueSubscribe(subject, qgroup, stan.MsgHandler(cb), options...)
+func (m NatsManager) QueueSubscribe(subject string, qgroup string, cb MsgHandler, opts ...stan.SubscriptionOption) (Subscription, error) {
+	return m.client.QueueSubscribe(subject, qgroup, stan.MsgHandler(cb), opts...)
 }
 
 func (m NatsManager) Close() error {
