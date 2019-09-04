@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/nats-io/stan.go"
-	"os"
-	"os/signal"
 	"sync"
 	"time"
 )
@@ -72,23 +70,10 @@ func (m NatsManager) QueueSubscribe(subject string, qgroup string, handler MsgHa
 	sub, err := m.client.QueueSubscribe(subject, qgroup, stan.MsgHandler(handler), opts...)
 
 	if err != nil {
-		return nil, err
+		_ = m.client.Close()
 	}
 
-	signalChan := make(chan os.Signal, 1)
-	cleanupDone := make(chan bool)
-	signal.Notify(signalChan, os.Interrupt)
-
-	go func() {
-		for range signalChan {
-			sub.Unsubscribe()
-			m.client.Close()
-			cleanupDone <- true
-		}
-	}()
-	<-cleanupDone
-
-	return sub, nil
+	return sub, err
 }
 
 func (m NatsManager) Close() error {
