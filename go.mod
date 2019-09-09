@@ -7,3 +7,5 @@ require (
 	github.com/paysuper/paysuper-recurring-repository v1.0.123 // indirect
 	github.com/stretchr/testify v1.3.0
 )
+
+go 1.13
